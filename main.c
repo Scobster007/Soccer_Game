@@ -2,6 +2,8 @@
 #include <default.c>
 #include <ackphysx.h>
 
+#define TRACE_FLAGS (IGNORE_ME | IGNORE_PASSABLE | IGNORE_PASSENTS | IGNORE_MAPS | IGNORE_SPRITES | IGNORE_CONTENT)
+
 ENTITY* playermodel; //need to declare entities here
 ENTITY* SoccerBall;
 ENTITY* playertwomodel;
@@ -24,6 +26,9 @@ STRING* PLAYERSCOREONE = "0";
 STRING* PLAYERSCORETWO = "0";
 
 var snd_handle1, snd_handle2, snd_handle3, snd_handle4; // these are the variabes that will handle the sound action
+var camResult = 0;
+int kickStrength = 10;
+
 random_seed(0);
 
 var tempO[3]; //temp for orbit
@@ -118,7 +123,22 @@ vec_set(my.max_x,vector(1.7,1.7,9.5));
          anim_percent += 5*time_step; 
          ent_animate(me,"stand",anim_percent,ANM_CYCLE); // play the "stand" animation
       }
-      wait(1);
+      
+      if(vec_dist(me.x, SoccerBall.x)<5) 
+ 		{
+			if(snd_playing(snd_handle3) == 0)
+			{
+				snd_handle3 = snd_play(kick, 50, 0);
+			}
+			VECTOR kick;
+			vec_set(kick,SoccerBall.x);
+			vec_sub(kick,me.x);
+			vec_normalize(kick,kickStrength);
+			pXent_addvelcentral(SoccerBall,kick);
+			playerhit = 1;
+		
+		}
+		wait(1);
       
    }
 }
@@ -182,6 +202,20 @@ vec_set(my.max_x,vector(1.7,1.7,9.5));
          anim_percent += 5*time_step; 
          ent_animate(me,"stand",anim_percent,ANM_CYCLE); // play the "stand" animation
       }
+      
+      if(vec_dist(me.x, SoccerBall.x)<5) 
+      {
+			if(snd_playing(snd_handle4) == 0)
+			{
+				snd_handle4 = snd_play(kick, 50, 0);
+			}
+			VECTOR kick;
+			vec_set(kick,SoccerBall.x);
+			vec_sub(kick,me.x);
+			vec_normalize(kick,kickStrength);
+			pXent_addvelcentral(SoccerBall,kick);
+			playerhit = 2;
+		}
       wait(1);
       
    }
@@ -211,42 +245,62 @@ action artificial_movement()
    		my.pan += 15 * x * time_step;
    		y = random(100);
    	}
-   		y = y-1;
-   		var dist_ahead = 20*time_step;
-      	dist_ahead = sign(dist_ahead)*(abs(dist_ahead) + 0.05);
-      	c_move(me,vector(0,-dist_ahead,0),vector(0,0,-5*time_step),IGNORE_PASSABLE | GLIDE);
+   	y = y-1;
+   	var dist_ahead = 20*time_step;
+      dist_ahead = sign(dist_ahead)*(abs(dist_ahead) + 0.05);
+      c_move(me,vector(0,-dist_ahead,0),vector(0,0,-5*time_step),IGNORE_PASSABLE | GLIDE);
       
       
-      	if (dist_ahead != 0) // player is moving ahead
-      	{
-         	anim_percent += 1*dist_ahead; // 1 = walk cycle percentage per quant, adjust for animation speed
-         	ent_animate(me,"walk",anim_percent,ANM_CYCLE); // play the "walk" animation
+      if (dist_ahead != 0) // player is moving ahead
+      {
+        	anim_percent += 1*dist_ahead; // 1 = walk cycle percentage per quant, adjust for animation speed
+        	ent_animate(me,"walk",anim_percent,ANM_CYCLE); // play the "walk" animation
 
-			// add some footstep sounds here synchronised with individual frames of the animation
-				//play left footstep sounds
-      	   if(((my.frame >= 5 && my.frame <= 6)||(my.frame >= 21 && my.frame <= 22)||(my.frame >= 41 && my.frame <= 42))
-         		 && (snd_playing(snd_handle1) == 0)) {
-         		snd_handle1 = snd_play(footstep,100,0);
-         	}
+		// add some footstep sounds here synchronised with individual frames of the animation
+			//play left footstep sounds
+     	   if(((my.frame >= 5 && my.frame <= 6)||(my.frame >= 21 && my.frame <= 22)||(my.frame >= 41 && my.frame <= 42))
+         	 && (snd_playing(snd_handle1) == 0)) 
+         {
+         	snd_handle1 = snd_play(footstep,100,0);
+         }
          
          	//play right footstep sounds
-         	if(((my.frame >= 13 && my.frame <= 14)||(my.frame >= 33 && my.frame <= 34)||(my.frame >= 50 && my.frame <= 51))
-         		 && (snd_playing(snd_handle2) == 0)) {
-         		snd_handle2 = snd_play(footstep,100,0);
-         	}
-      	}
-      	else // player stands still
-      	{ 
-         	anim_percent += 5*time_step; 
-         	ent_animate(me,"stand",anim_percent,ANM_CYCLE); // play the "stand" animation
-      	}
-      	wait(10);
+        	if(((my.frame >= 13 && my.frame <= 14)||(my.frame >= 33 && my.frame <= 34)||(my.frame >= 50 && my.frame <= 51))
+        		 && (snd_playing(snd_handle2) == 0)) 
+         {
+        		snd_handle2 = snd_play(footstep,100,0);
+        	}
+      }
+      else // player stands still
+      { 
+        	anim_percent += 5*time_step; 
+        	ent_animate(me,"stand",anim_percent,ANM_CYCLE); // play the "stand" animation
+     	}
+     	wait(10);
       	
       	
-      	if (my.y > 300 || my.y < -340 || my.x < -250 || my.x > 175)
-      	{
-      		my.pan += 180;	
+     	if (my.y > 300 || my.y < -340 || my.x < -250 || my.x > 175)
+     	{
+     		my.pan += 180;	
+ 		}
+ 		
+ 		
+ 		if(vec_dist(me.x, SoccerBall.x)<5) 
+ 		{
+			if(snd_playing(snd_handle3) == 0)
+			{
+				snd_handle3 = snd_play(kick, 50, 0);
 			}
+			VECTOR kick;
+			vec_set(kick,SoccerBall.x);
+			vec_sub(kick,me.x);
+			vec_normalize(kick,kickStrength);
+			pXent_addvelcentral(SoccerBall,kick);
+			playerhit = 0;
+		
+		}	
+		
+		
 	}
    	
 }
@@ -362,88 +416,6 @@ function main()
 	{
 		mouse_pos.x = mouse_cursor.x; // allow the mouse pointer to move
 		mouse_pos.y = mouse_cursor.y; // on the x and y axis
-
-	int kickStrength = 10;
-	if(vec_dist(playermodel.x, SoccerBall.x)<5) {
-		if(snd_playing(snd_handle3) == 0)
-		{
-			snd_handle3 = snd_play(kick, 50, 0);
-		}
-		VECTOR kick;
-		vec_set(kick,SoccerBall.x);
-		vec_sub(kick,playermodel.x);
-		vec_normalize(kick,kickStrength);
-		pXent_addvelcentral(SoccerBall,kick);
-		playerhit = 1;
-		
-	}
-	if(vec_dist(playertwomodel.x, SoccerBall.x)<5) {
-		if(snd_playing(snd_handle4) == 0)
-		{
-			snd_handle4 = snd_play(kick, 50, 0);
-		}
-		VECTOR kick;
-		vec_set(kick,SoccerBall.x);
-		vec_sub(kick,playertwomodel.x);
-		vec_normalize(kick,kickStrength);
-		pXent_addvelcentral(SoccerBall,kick);
-		playerhit = 2;
-	}
-	int kickStrength = 10;
-	if(vec_dist(AIOne.x, SoccerBall.x)<5) {
-		if(snd_playing(snd_handle3) == 0)
-		{
-			snd_handle3 = snd_play(kick, 50, 0);
-		}
-		VECTOR kick;
-		vec_set(kick,SoccerBall.x);
-		vec_sub(kick,AIOne.x);
-		vec_normalize(kick,kickStrength);
-		pXent_addvelcentral(SoccerBall,kick);
-		playerhit = 1;
-		
-	}
-	if(vec_dist(AI2.x, SoccerBall.x)<5) {
-		if(snd_playing(snd_handle3) == 0)
-		{
-			snd_handle3 = snd_play(kick, 50, 0);
-		}
-		VECTOR kick;
-		vec_set(kick,SoccerBall.x);
-		vec_sub(kick,AI2.x);
-		vec_normalize(kick,kickStrength);
-		pXent_addvelcentral(SoccerBall,kick);
-		playerhit = 1;
-		
-	}
-	
-	if(vec_dist(AI3.x, SoccerBall.x)<5) {
-		if(snd_playing(snd_handle3) == 0)
-		{
-			snd_handle3 = snd_play(kick, 50, 0);
-		}
-		VECTOR kick;
-		vec_set(kick,SoccerBall.x);
-		vec_sub(kick,AI3.x);
-		vec_normalize(kick,kickStrength);
-		pXent_addvelcentral(SoccerBall,kick);
-		playerhit = 1;
-		
-	}
-	
-	if(vec_dist(AI4.x, SoccerBall.x)<5) {
-		if(snd_playing(snd_handle3) == 0)
-		{
-			snd_handle3 = snd_play(kick, 50, 0);
-		}
-		VECTOR kick;
-		vec_set(kick,SoccerBall.x);
-		vec_sub(kick,AI4.x);
-		vec_normalize(kick,kickStrength);
-		pXent_addvelcentral(SoccerBall,kick);
-		playerhit = 1;
-		
-	}
 	
 	
 	if((SoccerBall.y > 300 | SoccerBall.y < -340) & SoccerBall.x < -17.5 & SoccerBall.x > -47.5)
@@ -504,6 +476,17 @@ function main()
 		vec_rotate(vMove,camera.pan);
 		vec_add(camera.x,vMove);//moves camera with arrow keys
 		vec_add(playermodel.x,vMove);//moves pFocus with camera/arrow keys
+		
+		camResult = c_trace(playermodel.x, camera.x, TRACE_FLAGS | IGNORE_MODELS | IGNORE_FLAG2);
+		// if we hit something:
+		if(camResult > 0){
+			// scale the normal we get from the hit surface:
+			vec_scale(normal.x, 10);
+			// add it to the hit position:
+			vec_add(target.x, normal.x);
+			// set camera to that position:
+			vec_set(camera.x, target.x);
+		}
 				
 				//stops player from falling through groundplane
 				//if (playertwomodel.z < 1)
