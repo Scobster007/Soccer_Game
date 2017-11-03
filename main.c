@@ -315,9 +315,9 @@ function main()
 	shadow_stencil = 0;
 	mtl_shadow.alpha = 65;
 	d3d_antialias = 1;
-	sky_color.red = 75;
-	sky_color.green = 0;
-	sky_color.blue = 75;
+	sky_color.red = 135;
+	sky_color.green = 206;
+	sky_color.blue = 235;
 	
 	set(Score, VISIBLE);
 
